@@ -9,7 +9,14 @@ size_t strlen(const char *s) {
 }
 
 char *strcpy(char *dst, const char *src) {
-	panic("please implement");
+	char *start = dst;
+	while(*src!='\0') {
+		*dst = *src;
+		dst++;
+		src++;
+	}
+	*dst = '\0';
+	return start;
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
@@ -22,7 +29,22 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 char *strcat(char *dst, const char *src) {
-	panic("please implement");
+	char *rst,start;
+	start = rst;
+	while(*src!='\0') {
+		if(*dst!='\0') {
+			*rst = *dst;
+			rst++;
+			dst++;
+		}
+		else {
+			*rst = *src;
+			rst++;
+			src++;
+		}
+	}
+	*rst='\0';
+	return start;
 }
 
 int strcmp(const char *s1, const char *s2) {
@@ -69,7 +91,10 @@ void *memcpy(void *out, const void *in, size_t n) {
 
 int memcmp(const void *s1, const void *s2, size_t n) {
 	size_t i=0;
-	for(i=0;*((unsigned int *)s1)!='\0'&&*s2!='\0'&&i<n;i++) {
-		if(
+	for(i=0;i<n;i++) {
+		if(*((unsigned int *)s1)!=*((unsigned int *)s2)) {
+			return *((unsigned int *)s1)- *((unsigned int *)s2);
+		}
 	}
+	return 0;
 }

@@ -80,6 +80,7 @@ void *memset(void *s, int c, size_t n) {
 	for(i=0;i<n;i++) {
 		*(((int *)s)+i)=c;
 	}
+	return s;
 }
 
 void *memcpy(void *out, const void *in, size_t n) {

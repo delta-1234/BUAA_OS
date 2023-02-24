@@ -29,21 +29,18 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 char *strcat(char *dst, const char *src) {
-	char *rst,*start;
-	start = rst;
-	while(*src!='\0') {
-		if(*dst!='\0') {
-			*rst = *dst;
-			rst++;
-			dst++;
-		}
-		else {
-			*rst = *src;
-			rst++;
-			src++;
-		}
+	char *start;
+	start = dst;
+	while (*dst!='\0')
+	{
+		dst++;
 	}
-	*rst='\0';
+	while(*src!='\0') {
+		*dst = *src;
+		dst++;
+		src++;
+	}
+	*dst='\0';
 	return start;
 }
 

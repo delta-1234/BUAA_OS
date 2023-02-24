@@ -29,7 +29,7 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 char *strcat(char *dst, const char *src) {
-	char *rst,start;
+	char *rst,*start;
 	start = rst;
 	while(*src!='\0') {
 		if(*dst!='\0') {

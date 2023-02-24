@@ -1,7 +1,11 @@
 #include <blib.h>
 
 size_t strlen(const char *s) {
-	panic("please implement");
+	size_t len=0;
+	while(*(s+len)!='\0') {
+		len++;
+	}
+	return len;
 }
 
 char *strcpy(char *dst, const char *src) {
@@ -22,7 +26,15 @@ char *strcat(char *dst, const char *src) {
 }
 
 int strcmp(const char *s1, const char *s2) {
-	panic("please implement");
+	while(*s1!='\0'&&*s2!='\0') {
+		if(*s1!=*s2) {
+			return *s1-*s2;
+		}
+		s1++;
+		s2++;
+	}	
+	if(*s1=='\0'&&*s2=='\0')
+		return 0;
 }
 
 int strncmp(const char *s1, const char *s2, size_t n) {
@@ -40,7 +52,10 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 }
 
 void *memset(void *s, int c, size_t n) {
-	panic("please implement");
+	size_t i;
+	for(i=0;i<n;i++) {
+		*(((int *)s)+i)=c;
+	}
 }
 
 void *memcpy(void *out, const void *in, size_t n) {
@@ -53,5 +68,8 @@ void *memcpy(void *out, const void *in, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-	panic("please implement");
+	size_t i=0;
+	for(i=0;*((unsigned int *)s1)!='\0'&&*s2!='\0'&&i<n;i++) {
+		if(
+	}
 }

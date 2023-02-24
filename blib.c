@@ -91,9 +91,9 @@ void *memcpy(void *out, const void *in, size_t n) {
 
 int memcmp(const void *s1, const void *s2, size_t n) {
 	size_t i=0;
-	for(i=0;i<n;i++) {
-		if(*((unsigned int *)s1)!=*((unsigned int *)s2)) {
-			return *((unsigned int *)s1)- *((unsigned int *)s2);
+	for(i=0;i<n;i++,s1++,s2++) {
+		if(*((unsigned char *)s1)!=*((unsigned char *)s2)) {
+			return *((unsigned char *)s1)- *((unsigned char *)s2);
 		}
 	}
 	return 0;

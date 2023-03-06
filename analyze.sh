@@ -17,7 +17,7 @@ else
     ;;
     "--diff")
         # Your code here. (4/4)
-	diff -q $1 $3
+	if diff -q $1 $3 > /dev/null; then echo same;else echo different;fi
     ;;
     esac
 fi

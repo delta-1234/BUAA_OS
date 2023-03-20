@@ -99,13 +99,15 @@ int strcmp(const char *p, const char *q) {
 }
 
 char *dat;
+int x;
 int sprintf(char *buf, const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
 	dat = buf;
+	x = 0;
 	vprintfmt(myoutputk, (void *)buf, fmt, ap);
 	va_end(ap);
-	return 0;
+	return x;
 }
 
 void myoutputk(void *data, const char *buf, size_t len) {
@@ -115,4 +117,5 @@ void myoutputk(void *data, const char *buf, size_t len) {
 	}
 	dat[len] = '\0';
 	dat = dat + len;
+	x += len;
 }

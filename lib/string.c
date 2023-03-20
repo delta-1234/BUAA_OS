@@ -1,3 +1,5 @@
+#include <print.h>
+#include <string.h>
 #include <types.h>
 
 void *memcpy(void *dst, const void *src, size_t n) {
@@ -94,4 +96,23 @@ int strcmp(const char *p, const char *q) {
 	}
 
 	return 0;
+}
+
+char *dat;
+int sprintf(char *buf, const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
+	dat = buf;
+	vprintfmt(myoutputk, (void *)buf, fmt, ap);
+	va_end(ap);
+	return 0;
+}
+
+void myoutputk(void *data, const char *buf, size_t len) {
+	char *s = dat;
+	for (int i = 0; i < len; i++) {
+		s[i] = buf[i];
+	}
+	dat[len] = '\0';
+	dat = dat + len;
 }

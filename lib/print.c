@@ -16,7 +16,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 	int ladjust;   // output is left-aligned
 	char padc;     // padding char
 
-	for (;*fmt != '\0';) {
+	for (; *fmt != '\0';) {
 		/* scan for the next '%' */
 		/* Exercise 1.4: Your code here. (1/8) */
 		while (*fmt != '%' && *fmt != '\0') {
@@ -52,7 +52,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 		}
 		/* get width */
 		/* Exercise 1.4: Your code here. (6/8) */
-		for (width = 0;*fmt >= '0' && *fmt <='9';fmt++) {
+		for (width = 0; *fmt >= '0' && *fmt <= '9'; fmt++) {
 			width = width * 10 + (*fmt - '0');
 		}
 		/* check for long */

@@ -16,7 +16,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 	int ladjust;   // output is left-aligned
 	char padc;     // padding char
 
-	for (;*fmt != '\0';) {
+	for (; *fmt != '\0';) {
 		/* scan for the next '%' */
 		/* Exercise 1.4: Your code here. (1/8) */
 		while (*fmt != '%' && *fmt != '\0') {
@@ -52,7 +52,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 		}
 		/* get width */
 		/* Exercise 1.4: Your code here. (6/8) */
-		for (width = 0;*fmt >= '0' && *fmt <='9';fmt++) {
+		for (width = 0; *fmt >= '0' && *fmt <= '9'; fmt++) {
 			width = width * 10 + (*fmt - '0');
 		}
 		/* check for long */
@@ -91,6 +91,28 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 			neg_flag = (num < 0) ? 1 : 0;
 			num = (num < 0) ? -num : num;
 			print_num(out, data, num, 10, neg_flag, width, ladjust, padc, 0);
+			break;
+
+		case 'R':
+			if (long_flag) {
+				num = va_arg(ap, long int);
+			} else {
+				num = va_arg(ap, int);
+			}
+			out(data, "(", 1);
+			neg_flag = (num < 0) ? 1 : 0;
+			num = (num < 0) ? -num : num;
+			print_num(out, data, num, 10, neg_flag, width, ladjust, padc, 0);
+			out(data, ",", 1);
+			if (long_flag) {
+				num = va_arg(ap, long int);
+			} else {
+				num = va_arg(ap, int);
+			}
+			neg_flag = (num < 0) ? 1 : 0;
+			num = (num < 0) ? -num : num;
+			print_num(out, data, num, 10, neg_flag, width, ladjust, padc, 0);
+			out(data, ")", 1);
 			break;
 
 		case 'o':

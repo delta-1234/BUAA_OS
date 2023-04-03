@@ -97,12 +97,12 @@ void page_init(void) {
 	/* Step 3: Mark all memory below `freemem` as used (set `pp_ref` to 1) */
 	/* Exercise 2.3: Your code here. (3/4) */
 	int i;
-	for (i=0;page2kva(&pages[i]) < freemem;i++) {
+	for (i = 0; page2kva(&pages[i]) < freemem; i++) {
 		pages[i].pp_ref = 1;
 	}
 	/* Step 4: Mark the other memory as free. */
 	/* Exercise 2.3: Your code here. (4/4) */
-	for (i=i;i < npage;i++) {
+	for (i = i; i < npage; i++) {
 		pages[i].pp_ref = 0;
 		LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
 	}
@@ -193,7 +193,7 @@ static int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte) {
 			return 0;
 		}
 	}
-	
+
 	/* Step 3: Assign the kernel virtual address of the page table entry to '*ppte'. */
 	/* Exercise 2.6: Your code here. (3/3) */
 	*ppte = ((Pte *)(KADDR(PTE_ADDR(*pgdir_entryp)))) + PTX(va);
@@ -509,4 +509,111 @@ void page_check(void) {
 	page_free(pp2);
 
 	printk("page_check() succeeded!\n");
+}
+
+#include <swap.h>
+
+struct Page_list page_free_swapable_list;
+static u_char *disk_alloc();
+static void disk_free(u_char *pdisk);
+
+void swap_init() {
+	LIST_INIT(&page_free_swapable_list);
+	for (int i = SWAP_PAGE_BASE; i < SWAP_PAGE_END; i += BY2PG) {
+		struct Page *pp = pa2page(i);
+		LIST_REMOVE(pp, pp_link);
+		LIST_INSERT_HEAD(&page_free_swapable_list, pp, pp_link);
+	}
+}
+
+// Interface for 'Passive Swap Out'
+struct Page *swap_alloc(Pde *pgdir, u_int asid) {
+	// Step 1: Ensure free page
+	if (LIST_EMPTY(&page_free_swapable_list)) {
+		/* Your Code Here (1/3) */
+		u_long pa = 0x3900000;
+		struct Page *p = pa2page(pa);
+		u_char *da = disk_alloc();
+		int i, j;
+		u_int res = 0;
+		u_long perm;
+		Pde *temppd = pgdir;
+		for (j = 0; j < 1024; j++) {
+			if ((*temppd & PTE_V) != 0) {
+				Pte *temp = ((Pte *)KADDR(PTE_ADDR(*temppd)));
+				for (i = 0; i < 1024; i++) {
+					perm = (*temp >> 12);
+					if ((*temp & PTE_V) != 0 && perm == pa) {
+						tlb_invalidate(asid, KADDR(PTE_ADDR(*temp)));
+						*temp = *temp & (~PTE_V);
+						*temp = *temp | PTE_SWP;
+						*temp = (*temp << 20) >> 20;
+						*temp = *temp | (((u_long)da) << 12);
+					}
+					temp += 1;
+				}
+			}
+			temppd += 1;
+		}
+		memcpy((void *)KADDR(da), (void *)page2kva(p), BY2PG);
+		LIST_INSERT_HEAD(&page_free_swapable_list, p, pp_link);
+	}
+
+	// Step 2: Get a free page and clear it
+	struct Page *pp = LIST_FIRST(&page_free_swapable_list);
+	LIST_REMOVE(pp, pp_link);
+	memset((void *)page2kva(pp), 0, BY2PG);
+
+	return pp;
+}
+
+// Interfaces for 'Active Swap In'
+static int is_swapped(Pde *pgdir, u_long va) {
+	/* Your Code Here (2/3) */
+	Pte **ppte;
+	int r = pgdir_walk(pgdir, va, 0, ppte);
+	if (r != 0)
+		return 0;
+	if (**ppte & PTE_SWP != 0)
+		return 1;
+	return 0;
+}
+
+static void swap(Pde *pgdir, u_int asid, u_long va) {
+	/* Your Code Here (3/3) */
+	Page *p = swap_alloc(pgdir, asid);
+}
+
+Pte swap_lookup(Pde *pgdir, u_int asid, u_long va) {
+	// Step 1: If corresponding page is swapped out, swap it in
+	if (is_swapped(pgdir, va)) {
+		swap(pgdir, asid, va);
+	}
+
+	// Step 2: Look up page table element.
+	Pte *ppte;
+	page_lookup(pgdir, va, &ppte);
+
+	// Step 3: Return
+	return ppte == NULL ? 0 : *ppte;
+}
+
+// Disk Simulation (Do not modify)
+u_char swap_disk[SWAP_DISK_NPAGE * BY2PG] __attribute__((aligned(BY2PG)));
+u_char swap_disk_used[SWAP_DISK_NPAGE];
+
+static u_char *disk_alloc() {
+	int alloc = 0;
+	for (; alloc < SWAP_DISK_NPAGE && swap_disk_used[alloc]; alloc++) {
+		;
+	}
+	assert(alloc < SWAP_DISK_NPAGE);
+	swap_disk_used[alloc] = 1;
+	return &swap_disk[alloc * BY2PG];
+}
+
+static void disk_free(u_char *pdisk) {
+	int offset = pdisk - swap_disk;
+	assert(offset % BY2PG == 0);
+	swap_disk_used[offset / BY2PG] = 0;
 }

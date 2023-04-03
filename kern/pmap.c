@@ -97,12 +97,12 @@ void page_init(void) {
 	/* Step 3: Mark all memory below `freemem` as used (set `pp_ref` to 1) */
 	/* Exercise 2.3: Your code here. (3/4) */
 	int i;
-	for (i=0;page2kva(&pages[i]) < freemem;i++) {
+	for (i = 0; page2kva(&pages[i]) < freemem; i++) {
 		pages[i].pp_ref = 1;
 	}
 	/* Step 4: Mark the other memory as free. */
 	/* Exercise 2.3: Your code here. (4/4) */
-	for (i=i;i < npage;i++) {
+	for (i = i; i < npage; i++) {
 		pages[i].pp_ref = 0;
 		LIST_INSERT_HEAD(&page_free_list, &pages[i], pp_link);
 	}
@@ -193,11 +193,34 @@ static int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte) {
 			return 0;
 		}
 	}
-	
+
 	/* Step 3: Assign the kernel virtual address of the page table entry to '*ppte'. */
 	/* Exercise 2.6: Your code here. (3/3) */
 	*ppte = ((Pte *)(KADDR(PTE_ADDR(*pgdir_entryp)))) + PTX(va);
 	return 0;
+}
+
+u_int page_perm_stat(Pde *pgdir, struct Page *pp, u_int perm_mask) {
+	int i, j;
+	u_int res = 0;
+	u_int perm;
+	Pde *temppd = pgdir;
+	for (j = 0; j < 1024; j++) {
+		Pte *temp = ((Pte *)KADDR(PTE_ADDR(*temppd)));
+		for (i = 0; i < 1024; i++) {
+			perm = (*temp << 20) >> 20;
+			if ((*temp & PTE_V) != 0) {
+				if (PTE_ADDR(*temp) == page2pa(pp)) {
+					if (~((~perm_mask) | perm) == 0) {
+						res++;
+					}
+				}
+			}
+			temp += 1;
+		}
+		temppd += 1;
+	}
+	return res;
 }
 
 /* Overview:

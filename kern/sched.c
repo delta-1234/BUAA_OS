@@ -17,7 +17,7 @@
 void schedule(int yield) {
 	static int count = 0; // remaining time slices of current env
 	struct Env *e = curenv;
-
+	static int user_time[5];
 	/* We always decrease the 'count' by 1.
 	 *
 	 * If 'yield' is set, or 'count' has been decreased to 0, or 'e' (previous 'curenv') is
@@ -35,15 +35,36 @@ void schedule(int yield) {
 	 *   'TAILQ_FIRST', 'TAILQ_REMOVE', 'TAILQ_INSERT_TAIL'
 	 */
 	/* Exercise 3.12: Your code here. */
+	int a[5] = {-1, -1, -1, -1, -1};
+	int i, min, u;
+	struct Env *tmp = TAILQ_FIRST(&env_sched_list);
+	while (tmp != NULL) {
+		a[tmp->env_user]++;
+		tmp = TAILQ_NEXT(tmp, env_sched_link);
+	}
 	if (yield || count <= 0 || e == NULL || e->env_status != ENV_RUNNABLE) {
 		if (e != NULL && e->env_status == ENV_RUNNABLE) {
 			TAILQ_REMOVE(&env_sched_list, e, env_sched_link);
 			TAILQ_INSERT_TAIL(&env_sched_list, e, env_sched_link);
+			user_time[e->env_user] += e->env_pri;
 		}
-		e = TAILQ_FIRST(&env_sched_list);
-		if (e == NULL) {
+		if (TAILQ_FIRST(&env_sched_list) == NULL) {
 			panic("schedule: no runnable envs");
 		}
+		for (i = 0, min = 2048; i < 5; i++) {
+			if (a[i] != -1 && user_time[i] < min) {
+				min = user_time[i];
+				u = i;
+			}
+		}
+		tmp = TAILQ_FIRST(&env_sched_list);
+		while (tmp != NULL) {
+			if (tmp->env_user == u) {
+				break;
+			}
+			tmp = TAILQ_NEXT(tmp, env_sched_link);
+		}
+		e = tmp;
 		count = e->env_pri;
 	}
 	count--;

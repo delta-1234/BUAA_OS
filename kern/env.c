@@ -164,7 +164,7 @@ void env_init(void) {
 	 * them into the 'env_free_list'. Make sure, after the insertion, the order of envs in the
 	 * list should be the same as they are in the 'envs' array. */
 	/* Exercise 3.1: Your code here. (2/2) */
-	for (i = NENV - 1;i >= 0;i--) {
+	for (i = NENV - 1; i >= 0; i--) {
 		envs[i].env_status = ENV_FREE;
 		LIST_INSERT_HEAD(&env_free_list, &envs[i], env_link);
 	}
@@ -261,6 +261,7 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	e->env_runs = 0;	       // for lab6
 	/* Exercise 3.4: Your code here. (3/4) */
 	e->env_id = mkenvid(e);
+	e->env_gid = 0;
 	r = asid_alloc(&e->env_asid);
 	if (r) {
 		return -E_NO_FREE_ENV;

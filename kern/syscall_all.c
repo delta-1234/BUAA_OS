@@ -492,7 +492,9 @@ void sys_barrier_wait() {
 	if (flag == 0) {
 		flag = 1;
 	}
-	barrier--;
+	if (barrier >= 0) {
+		barrier--;
+	}
 }
 
 void *syscall_table[MAX_SYSNO] = {

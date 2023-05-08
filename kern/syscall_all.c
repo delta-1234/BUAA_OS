@@ -486,6 +486,7 @@ int sys_barrier_get() {
 	if (flag == 1) {
 		return barrier;
 	}
+	return 0;
 }
 
 void sys_barrier_wait() {

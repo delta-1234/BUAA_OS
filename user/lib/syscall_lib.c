@@ -67,10 +67,20 @@ int syscall_cgetc() {
 
 int syscall_write_dev(void *va, u_int dev, u_int len) {
 	/* Exercise 5.2: Your code here. (1/2) */
-
 }
 
 int syscall_read_dev(void *va, u_int dev, u_int len) {
 	/* Exercise 5.2: Your code here. (2/2) */
+}
 
+void syscall_barrier_alloc(int n) {
+	msyscall(SYS_barrier_alloc, n);
+}
+
+int syscall_barrier_get() {
+	return msyscall(SYS_barrier_get);
+}
+
+void syscall_barrier_wait() {
+	msyscall(SYS_barrier_wait);
 }

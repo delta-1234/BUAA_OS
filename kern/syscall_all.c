@@ -408,7 +408,7 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	if (srcva != 0) {
 		/* Exercise 4.8: Your code here. (8/8) */
 		Pte *ppte = NULL;
-		struct Page * pa = page_lookup(curenv->env_pgdir, srcva, &ppte);
+		struct Page *pa = page_lookup(curenv->env_pgdir, srcva, &ppte);
 		if (pa == NULL) {
 			return -E_INVAL;
 		}
@@ -474,6 +474,27 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	return 0;
 }
 
+int barrier = -1;
+int flag = 0;
+void sys_barrier_alloc(int n) {
+	if (barrier == -1) {
+		barrier = n;
+	}
+}
+
+int sys_barrier_get() {
+	if (flag == 1) {
+		return barrier;
+	}
+}
+
+void sys_barrier_wait() {
+	if (flag == 0) {
+		flag = 1;
+	}
+	barrier--;
+}
+
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -493,6 +514,9 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+    [SYS_barrier_alloc] = sys_barrier_alloc,
+    [SYS_barrier_get] = sys_barrier_get,
+    [SYS_barrier_wait] = sys_barrier_wait,
 };
 
 /* Overview:

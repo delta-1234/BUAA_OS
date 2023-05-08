@@ -22,6 +22,9 @@ enum {
 	SYS_cgetc,
 	SYS_write_dev,
 	SYS_read_dev,
+	SYS_barrier_alloc,
+	SYS_barrier_get,
+	SYS_barrier_wait,
 	MAX_SYSNO,
 };
 

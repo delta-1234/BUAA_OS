@@ -476,6 +476,8 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 
 int barrier = -1;
 int flag = 0;
+struct Env *e[64];
+int n;
 void sys_barrier_alloc(int n) {
 	if (barrier == -1) {
 		barrier = n;
@@ -493,9 +495,22 @@ void sys_barrier_wait() {
 	if (flag == 0) {
 		flag = 1;
 	}
-	if (barrier >= 0) {
+	if (barrier > 0) {
 		barrier--;
 	}
+	/*	if (barrier == 0) {
+			int i = 0;
+			for (i = 0; i < n; i++) {
+				e[i]->env_status = ENV_RUNNABLE;
+				TAILQ_INSERT_TAIL(&env_sched_list, e[i], env_sched_link);
+			}
+			n = 0;
+		} else {
+			e[n] = curenv;
+			n++;
+			curenv->env_status = ENV_NOT_RUNNABLE;
+			TAILQ_REMOVE(&env_sched_list, curenv, env_sched_link);
+		}*/
 }
 
 void *syscall_table[MAX_SYSNO] = {

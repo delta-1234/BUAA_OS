@@ -460,7 +460,7 @@ int sys_write_dev(u_int va, u_int pa, u_int len) {
 	|| (pa >= 0x15000000 && pa + len <= 0x15000200))) {
 		return -E_INVAL;
 	}
-	memcpy((void *)(pa | KSEG1), (void *)va, len);
+	memcpy((void *)(pa + KSEG1), (void *)va, len);
 	return 0;
 }
 
@@ -484,7 +484,7 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	|| (pa >= 0x15000000 && pa + len <= 0x15000200))) {
 		return -E_INVAL;
 	}
-	memcpy((void *)va, (void *)(pa | KSEG1), len);
+	memcpy((void *)va, (void *)(pa + KSEG1), len);
 	return 0;
 }
 

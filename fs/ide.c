@@ -38,6 +38,9 @@ void ide_read(u_int diskno, u_int secno, void *dst, u_int nsecs) {
 		temp = 0;
 		panic_on(syscall_write_dev(&temp, DEV_DISK_ADDRESS | DEV_DISK_START_OPERATION, 4));
 		panic_on(syscall_read_dev(&temp, DEV_DISK_ADDRESS | DEV_DISK_STATUS, 4));
+		if (temp != 0) {
+			user_panic("ide_read panic");
+		}
 		panic_on(syscall_read_dev((void *)(dst + off), DEV_DISK_ADDRESS | DEV_DISK_BUFFER, DEV_DISK_BUFFER_LEN));
 	}
 }
@@ -72,5 +75,8 @@ void ide_write(u_int diskno, u_int secno, void *src, u_int nsecs) {
 		temp = 1;
 		panic_on(syscall_write_dev(&temp, DEV_DISK_ADDRESS | DEV_DISK_START_OPERATION, 4));
 		panic_on(syscall_read_dev(&temp, DEV_DISK_ADDRESS | DEV_DISK_STATUS, 4));
+		if (temp != 1) {
+			user_panic("ide_write panic");
+		}
 	}
 }

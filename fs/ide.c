@@ -75,7 +75,7 @@ void ide_write(u_int diskno, u_int secno, void *src, u_int nsecs) {
 		temp = 1;
 		panic_on(syscall_write_dev(&temp, DEV_DISK_ADDRESS | DEV_DISK_START_OPERATION, 4));
 		panic_on(syscall_read_dev(&temp, DEV_DISK_ADDRESS | DEV_DISK_STATUS, 4));
-		if (temp != 1) {
+		if (temp != 0) {
 			user_panic("ide_write panic");
 		}
 	}

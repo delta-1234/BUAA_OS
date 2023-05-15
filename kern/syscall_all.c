@@ -408,7 +408,7 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	if (srcva != 0) {
 		/* Exercise 4.8: Your code here. (8/8) */
 		Pte *ppte = NULL;
-		struct Page * pa = page_lookup(curenv->env_pgdir, srcva, &ppte);
+		struct Page *pa = page_lookup(curenv->env_pgdir, srcva, &ppte);
 		if (pa == NULL) {
 			return -E_INVAL;
 		}
@@ -456,8 +456,9 @@ int sys_write_dev(u_int va, u_int pa, u_int len) {
 	if (is_illegal_va_range(va, len)) {
 		return -E_INVAL;
 	}
-	if (!((pa >= 0x10000000 && pa + len <= 0x10000020) || (pa >= 0x13000000 && pa + len <= 0x13004200)
-	|| (pa >= 0x15000000 && pa + len <= 0x15000200))) {
+	if (!((pa >= 0x10000000 && pa + len <= 0x10000020) ||
+	      (pa >= 0x13000000 && pa + len <= 0x13004200) ||
+	      (pa >= 0x15000000 && pa + len <= 0x15000200))) {
 		return -E_INVAL;
 	}
 	memcpy((void *)(pa + KSEG1), (void *)va, len);
@@ -480,8 +481,9 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	if (is_illegal_va_range(va, len)) {
 		return -E_INVAL;
 	}
-	if (!((pa >= 0x10000000 && pa + len <= 0x10000020) || (pa >= 0x13000000 && pa + len <= 0x13004200)
-	|| (pa >= 0x15000000 && pa + len <= 0x15000200))) {
+	if (!((pa >= 0x10000000 && pa + len <= 0x10000020) ||
+	      (pa >= 0x13000000 && pa + len <= 0x13004200) ||
+	      (pa >= 0x15000000 && pa + len <= 0x15000200))) {
 		return -E_INVAL;
 	}
 	memcpy((void *)va, (void *)(pa + KSEG1), len);

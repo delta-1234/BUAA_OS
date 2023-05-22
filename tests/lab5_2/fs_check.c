@@ -87,6 +87,26 @@ void fs_check() {
 
 int main() {
 	fs_init();
-	fs_check();
+	// fs_check();
+	int r;
+	struct File *f;
+	debugf("My test begin\n");
+	if ((r = file_open("/newmotd", &f)) < 0) {
+		user_panic("file_open /newmotd: %d", r);
+	}
+
+	debugf("file_open is good\n");
+	int child = fork();
+	if (child == 0) {
+		if ((r = file_set_size(f, 0)) < 0) {
+			user_panic("file_set_size: %e", r);
+		}
+		debugf("child can get file\n");
+	} else {
+	if ((r = file_set_size(f, 0)) < 0) {
+		user_panic("file_set_size: %e", r);
+	}
+	debugf("father can get file\n");
+	}
 	return 0;
 }

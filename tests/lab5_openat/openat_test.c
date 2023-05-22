@@ -8,7 +8,7 @@ int main() {
 		user_panic("open dir failed: %d", r);
 	}
 	dirfd = r;
-
+	debugf("1\n");
 	if ((r = openat(dirfd, "test_file", O_RDWR)) < 0) {
 		user_panic("openat file filed: %d", r);
 	}

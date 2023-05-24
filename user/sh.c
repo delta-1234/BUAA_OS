@@ -88,9 +88,18 @@ int parsecmd(char **argv, int *rightpipe) {
 			}
 			// Open 't' for reading, dup it onto fd 0, and then close the original fd.
 			/* Exercise 6.5: Your code here. (1/3) */
-
-			user_panic("< redirection not implemented");
-
+			fd = open(t, O_RDONLY);
+			if (fd < 0) {
+				user_panic("< redirection not implemented");
+			}
+			r = dup(fd, 0);
+			if (r < 0) {
+				user_panic("< redirection not implemented");
+			}
+			r = close(fd);
+			if (r < 0) {
+				user_panic("< redirection not implemented");
+			}
 			break;
 		case '>':
 			if (gettoken(0, &t) != 'w') {
@@ -99,8 +108,18 @@ int parsecmd(char **argv, int *rightpipe) {
 			}
 			// Open 't' for writing, dup it onto fd 1, and then close the original fd.
 			/* Exercise 6.5: Your code here. (2/3) */
-
-			user_panic("> redirection not implemented");
+			fd = open(t, O_WRONLY);
+			if (fd < 0) {
+				user_panic("> redirection not implemented");
+			}
+			r = dup(fd, 1);
+			if (r < 0) {
+				user_panic("> redirection not implemented");
+			}
+			r = close(fd);
+			if (r < 0) {
+				user_panic("> redirection not implemented");
+			}
 
 			break;
 		case '|':;
@@ -121,9 +140,40 @@ int parsecmd(char **argv, int *rightpipe) {
 			 */
 			int p[2];
 			/* Exercise 6.5: Your code here. (3/3) */
-
-			user_panic("| not implemented");
-
+			r = pipe(p);
+			if (r < 0) {
+				user_panic("| not implemented");
+			}
+			*rightpipe = fork();
+			if (*rightpipe == 0) {
+				r = dup(p[0], 0);
+				if (r < 0) {
+					user_panic("| not implemented");
+				}
+				r = close(p[0]);
+				if (r < 0) {
+					user_panic("| not implemented");
+				}
+				r = close(p[1]);
+				if (r < 0) {
+					user_panic("| not implemented");
+				}
+				return parsecmd(argv, rightpipe);
+			} else {
+				r = dup(p[1], 1);
+				if (r < 0) {
+					user_panic("| not implemented");
+				}
+				r = close(p[1]);
+				if (r < 0) {
+					user_panic("| not implemented");
+				}
+				r = close(p[0]);
+				if (r < 0) {
+					user_panic("| not implemented");
+				}
+				return argc;
+			}
 			break;
 		}
 	}

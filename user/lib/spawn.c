@@ -116,7 +116,7 @@ int spawn(char *prog, char **argv) {
 	int r;
 	u_char elfbuf[512];
 	/* Exercise 6.4: Your code here. (1/6) */
-	r = readn(fd, elfbuf, 512);
+	r = readn(fd, elfbuf, sizeof(Elf32_Ehdr));
 	if (r < 0) {
 		goto err;
 	}
@@ -132,11 +132,18 @@ int spawn(char *prog, char **argv) {
 	u_int child;
 	/* Exercise 6.4: Your code here. (2/6) */
 	child = syscall_exofork();
+	if (child < 0) {
+		r = child;
+		goto err;
+	}
 	// Step 4: Use 'init_stack(child, argv, &sp)' to initialize the stack of the child.
 	// 'goto err1' if that fails.
 	u_int sp;
 	/* Exercise 6.4: Your code here. (3/6) */
-	init_stack(child, argv, &sp);
+	r = init_stack(child, argv, &sp);
+	if (r < 0) {
+		goto err1;
+	}
 	// Step 5: Load the ELF segments in the file into the child's memory.
 	// This is similar to 'load_icode()' in the kernel.
 	size_t ph_off;

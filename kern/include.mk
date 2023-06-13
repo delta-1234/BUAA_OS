@@ -7,9 +7,9 @@ ifeq ($(call lab-ge,2), true)
 endif
 
 ifeq ($(call lab-ge,3), true)
-	targets     += env.o env_asm.o sched.o entry.o genex.o kclock.o traps.o
+	targets     += env.o env_asm.o sched.o entry.o genex.o kclock.o traps.o signal.o
 endif
 
 ifeq ($(call lab-ge,4), true)
-	targets     += syscall_all.o
+	targets     += syscall_all.o signal.o
 endif

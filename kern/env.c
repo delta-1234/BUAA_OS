@@ -5,6 +5,7 @@
 #include <pmap.h>
 #include <printk.h>
 #include <sched.h>
+#include <signal.h>
 
 // The maximum number of available ASIDs.
 // Our bitmap requires this to be a multiple of 32.
@@ -259,6 +260,17 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	 */
 	e->env_user_tlb_mod_entry = 0; // for lab4
 	e->env_runs = 0;	       // for lab6
+	//Lab4-challenge
+	int i;
+	for (i = 0; i< 64; i++) {
+		e->sigaction_list[i].sa_handler = NULL;
+		e->sigaction_list[i].sa_mask.sig[0] = 0;
+		e->sigaction_list[i].sa_mask.sig[1] = 0;
+	}
+	e->signal_list.len = 0;
+	e->signal_list.head = NULL;
+	e->signal_mask.sig[0] = 0;
+	e->signal_mask.sig[1] = 0;
 	/* Exercise 3.4: Your code here. (3/4) */
 	e->env_id = mkenvid(e);
 	r = asid_alloc(&e->env_asid);

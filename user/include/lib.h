@@ -7,6 +7,8 @@
 #include <pmap.h>
 #include <syscall.h>
 #include <trap.h>
+#include <sigaction.h>
+#include <signal.h>
 
 #define vpt ((volatile Pte *)UVPT)
 #define vpd ((volatile Pde *)(UVPT + (PDX(UVPT) << PGSHIFT)))
@@ -69,6 +71,12 @@ int syscall_cgetc();
 int syscall_write_dev(void *, u_int, u_int);
 int syscall_read_dev(void *, u_int, u_int);
 
+//Lab4-challenge syscall
+int syscall_sigation(int signum, const struct sigaction *act, struct sigaction *oldact);
+int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+int syscall_send_signal(u_int envid, int sig);
+int syscall_signal_return();
+
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);
 u_int ipc_recv(u_int *whom, void *dstva, u_int *perm);
@@ -118,6 +126,16 @@ int read_map(int fd, u_int offset, void **blk);
 int remove(const char *path);
 int ftruncate(int fd, u_int size);
 int sync(void);
+
+//Lab4-challenge sigaction.c
+int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
+int sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+void sigemptyset(sigset_t *set); // 清空信号集，将所有位都设置为 0
+void sigfillset(sigset_t *set); // 设置信号集，即将所有位都设置为 1
+void sigaddset(sigset_t *set, int signum); // 向信号集中添加一个信号，即将指定信号的位设置为 1
+void sigdelset(sigset_t *set, int signum); // 从信号集中删除一个信号，即将指定信号的位设置为 0
+int sigismember(const sigset_t *set, int signum); // 检查一个信号是否在信号集中，如果在则返回 1，否则返回 0
+int kill(u_int envid, int sig);
 
 #define user_assert(x)                                                                             \
 	do {                                                                                       \

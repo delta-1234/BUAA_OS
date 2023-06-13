@@ -5,6 +5,7 @@
 #include <printk.h>
 #include <sched.h>
 #include <syscall.h>
+#include <signal.h>
 
 extern struct Env *curenv;
 
@@ -489,6 +490,91 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	return 0;
 }
 
+//Lab4-challeng
+struct signal_node *free_list = NULL;
+
+int sig_alloc(struct signal_node **new) {
+    if (free_list == NULL) {
+        struct Page *p;
+        page_alloc(&p);
+		p->pp_ref++;
+		free_list = (struct signal_node *) page2kva(p);
+		free_list->next = NULL;
+		struct signal_node *temp;
+		for (temp = free_list + 1; temp + 1 < page2kva(p) + BY2PG; temp++) {
+			temp->next = free_list;
+			free_list = temp;
+		}
+    }
+	*new = free_list;
+	free_list = free_list->next;
+	return 0;
+}
+
+int sys_sigation(int signum, const struct sigaction *act, struct sigaction *oldact) {
+	if (signum > 64) {
+		return -1;
+	}
+	if (oldact != NULL) {
+		*oldact = curenv->sigaction_list[signum-1];
+	}
+	curenv->sigaction_list[signum-1].sa_handler = act->sa_handler;
+	curenv->sigaction_list[signum-1].sa_mask = act->sa_mask;
+	return 0;
+}
+
+int sys_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+	if (oldset != NULL) {
+		*oldset = curenv->signal_mask;
+	}
+	if (set == NULL) {
+		return -1;
+	}
+	if (how == SIG_BLOCK) {
+		curenv->signal_mask.sig[0] |= set->sig[0];
+		curenv->signal_mask.sig[1] |= set->sig[1];
+		u_int temp = ~(0x1 << (SIGKILL - 1));
+		curenv->signal_mask.sig[0] &= temp;
+	} else if (how == SIG_UNBLOCK) {
+		curenv->signal_mask.sig[0] &= (~set->sig[0]);
+		curenv->signal_mask.sig[1] &= (~set->sig[1]);
+	} else if (how == SIG_SETMASK) {
+		curenv->signal_mask = *set;
+	} else {
+		return -1;
+	}
+	return 0;
+}
+
+int sys_send_signal(u_int envid, int sig) {
+	if (sig > 64) {
+		return -1;
+	}
+	struct Env *env;
+	struct signal_node *new;
+	if (envid == 0) {
+		env = curenv;
+	} else {
+		int r = envid2env(envid, &env, 1);
+		if (r < 0) {
+			return -1;
+		}
+	}
+	if (env->signal_list.head == NULL) {
+		sig_alloc(&new);
+		env->signal_list.len++;
+		env->signal_list.head = new;
+		new->next = NULL;
+		new->signal = sig;
+	} else {
+		sig_alloc(&new);
+		env->signal_list.len++;
+		new->next = env->signal_list.head;
+		new->signal = sig;
+		env->signal_list.head = new;
+	}
+}
+
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -508,6 +594,9 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_sigation] = sys_sigation,
+	[SYS_sigprocmask] = sys_sigprocmask,
+	[SYS_send_signal] = sys_send_signal,
 };
 
 /* Overview:

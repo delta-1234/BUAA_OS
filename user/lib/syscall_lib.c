@@ -74,3 +74,20 @@ int syscall_read_dev(void *va, u_int dev, u_int len) {
 	/* Exercise 5.2: Your code here. (2/2) */
 	return msyscall(SYS_read_dev, va, dev, len);
 }
+
+//Lab4-challenge
+int syscall_sigation(int signum, const struct sigaction *act, struct sigaction *oldact) {
+	return msyscall(SYS_sigation, signum, act, oldact);
+}
+
+int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+	return msyscall(SYS_sigprocmask, how, set, oldset);
+}
+
+int syscall_send_signal(u_int envid, int sig) {
+	return msyscall(SYS_send_signal, envid, sig);
+}
+
+int syscall_signal_return() {
+	
+}

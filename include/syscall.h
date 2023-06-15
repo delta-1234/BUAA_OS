@@ -27,6 +27,7 @@ enum {
 	SYS_send_signal,
 	SYS_signal_return,
 	SYS_set_signal_return,
+	SYS_set_cow,
 	MAX_SYSNO,
 };
 

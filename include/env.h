@@ -45,6 +45,7 @@ struct Env {
 	struct signal_quene signal_list; //信号栈，后收到的信号先处理
 	struct signal_node *cur_signal; //当前正在处理的信号
 	u_int signal_return; //进程返回函数入口
+	u_int isCow;
 };
 
 LIST_HEAD(Env_list, Env);

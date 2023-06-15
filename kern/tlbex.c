@@ -7,8 +7,8 @@ static void passive_alloc(u_int va, Pde *pgdir, u_int asid) {
 
 	if (va < UTEMP) {
 		//Lab4-challenge
-		// send_signal(0, SIGSEGV);
-		// env_run(curenv);
+		send_signal(0, SIGSEGV);
+		env_run(curenv);
 		panic("address too low");
 	}
 

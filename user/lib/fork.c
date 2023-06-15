@@ -16,6 +16,7 @@
 static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	u_int va = tf->cp0_badvaddr;
 	u_int perm;
+	syscall_set_cow(1);
 	/* Step 1: Find the 'perm' in which the faulting address 'va' is mapped. */
 	/* Hint: Use 'vpt' and 'VPN' to find the page table entry. If the 'perm' doesn't have
 	 * 'PTE_COW', launch a 'user_panic'. */
@@ -41,7 +42,8 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	/* Exercise 4.13: Your code here. (6/6) */
 	syscall_mem_unmap(0, (void *)UCOW);
 	// Step 7: Return to the faulting routine.
-	
+
+	syscall_set_cow(0);
 	int r = syscall_set_trapframe(0, tf);
 	user_panic("syscall_set_trapframe returned %d", r);
 }

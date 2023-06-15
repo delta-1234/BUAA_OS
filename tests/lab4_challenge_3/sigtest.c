@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     sigaddset(&set, TEST_NUM);
     panic_on(sigprocmask(0, &set, NULL));
     int ans = 0;
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 30; i++) {
         kill(0, TEST_NUM);
         ans += i;
     }

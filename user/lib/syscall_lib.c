@@ -92,7 +92,7 @@ int syscall_send_signal(u_int envid, int sig) {
 }
 
 int syscall_signal_return() {
-	//syscall_yield();
+	syscall_yield();
 	int r = msyscall(SYS_signal_return);
 	//syscall_yield();
 	return r;
@@ -100,4 +100,8 @@ int syscall_signal_return() {
 
 int syscall_set_signal_return(u_int addr) {
 	return msyscall(SYS_set_signal_return, addr);
+}
+
+void syscall_set_cow(u_int num) {
+	return msyscall(SYS_set_cow, num);
 }

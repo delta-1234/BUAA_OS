@@ -273,7 +273,8 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	e->signal_mask.sig[1] = 0;
 	e->cur_signal = NULL;
 	e->signal_return = 0;
-
+	e->isCow = 0;
+	
 	/* Exercise 3.4: Your code here. (3/4) */
 	e->env_id = mkenvid(e);
 	r = asid_alloc(&e->env_asid);

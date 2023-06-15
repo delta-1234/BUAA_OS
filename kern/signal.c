@@ -78,7 +78,7 @@ void signal_finish() {
 void do_signal(struct Trapframe *tf) {
 	struct signal_node *temp, *pre_temp;
 	int flag = 0;
-	if (curenv->signal_list.len != 0 && curenv->cur_signal == NULL) {
+	if (curenv->signal_list.len != 0 && !curenv->isCow) {
 		temp = curenv->signal_list.head;
 		while (temp != NULL) {
 			if (!sigismember(&curenv->signal_mask, temp->signal)) {

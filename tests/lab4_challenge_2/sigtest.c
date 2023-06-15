@@ -19,4 +19,4 @@ int main() {
     kill(0, 4);
     return 0;
 }
-    
+

@@ -549,6 +549,10 @@ int sys_set_signal_return(u_int addr) {
 	}
 }
 
+void sys_set_cow(u_int num) {
+	curenv->isCow = num;
+}
+
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -573,6 +577,7 @@ void *syscall_table[MAX_SYSNO] = {
 	[SYS_send_signal] = sys_send_signal,
 	[SYS_signal_return] = sys_signal_return,
 	[SYS_set_signal_return] = sys_set_signal_return,
+	[SYS_set_cow] = sys_set_cow,
 };
 
 /* Overview:

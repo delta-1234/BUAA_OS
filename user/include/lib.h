@@ -77,6 +77,7 @@ int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
 int syscall_send_signal(u_int envid, int sig);
 int syscall_signal_return();
 int syscall_set_signal_return(u_int addr);
+void syscall_set_cow(u_int num);
 
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);

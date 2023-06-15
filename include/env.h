@@ -43,8 +43,8 @@ struct Env {
 	struct sigaction sigaction_list[64]; //注册的sigaction列表
 	sigset_t signal_mask; //进程信号掩码
 	struct signal_quene signal_list; //信号栈，后收到的信号先处理
-	//u_int cur_signal; //当前正在处理的信号
-	//u_int signal_caller; //进程signal处理函数入口，实际在在用户态定义
+	struct signal_node *cur_signal; //当前正在处理的信号
+	u_int signal_return; //进程返回函数入口
 };
 
 LIST_HEAD(Env_list, Env);

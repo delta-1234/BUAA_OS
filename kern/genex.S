@@ -15,7 +15,7 @@ END(handle_\exception)
 .text
 
 FEXPORT(ret_from_exception)
-	jal 	do_signal  /* Lab4-challeng 跳转到信号处理 */
+	// jal 	do_signal  /* Lab4-challeng 跳转到信号处理 */
 	RESTORE_SOME
 	lw      k0, TF_EPC(sp)
 	lw      sp, TF_REG29(sp) /* Deallocate stack */

@@ -11,6 +11,7 @@
 
 struct signal_node {
     int signal;
+    struct Trapframe oldTf;
     struct signal_node *next;
 };
 
@@ -28,6 +29,8 @@ struct sigaction {
     sigset_t sa_mask;
 };
 
-void do_signal() __attribute__((noreturn));
+void signal_finish();
+int send_signal(u_int envid, int sig);
+void do_signal(struct Trapframe *tf);
 
 #endif

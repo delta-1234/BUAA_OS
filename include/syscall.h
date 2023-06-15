@@ -25,6 +25,8 @@ enum {
 	SYS_sigation,
 	SYS_sigprocmask,
 	SYS_send_signal,
+	SYS_signal_return,
+	SYS_set_signal_return,
 	MAX_SYSNO,
 };
 

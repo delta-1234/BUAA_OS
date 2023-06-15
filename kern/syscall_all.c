@@ -253,6 +253,13 @@ int sys_exofork(void) {
 	/* Exercise 4.9: Your code here. (4/4) */
 	e->env_status = ENV_NOT_RUNNABLE;
 	e->env_pri = curenv->env_pri;
+	//Lab4-challenge 复制父进程的信号处理函数
+	memcpy(e->sigaction_list, curenv->sigaction_list, sizeof(e->sigaction_list[0])*64);
+	//复制父进程未处理完的信号
+	e->signal_list = curenv->signal_list;
+	e->cur_signal = curenv->cur_signal;
+	e->signal_mask = curenv->signal_mask;
+	e->signal_return = curenv->signal_return;
 	return e->env_id;
 }
 
@@ -491,25 +498,6 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 }
 
 //Lab4-challeng
-struct signal_node *free_list = NULL;
-
-int sig_alloc(struct signal_node **new) {
-    if (free_list == NULL) {
-        struct Page *p;
-        page_alloc(&p);
-		p->pp_ref++;
-		free_list = (struct signal_node *) page2kva(p);
-		free_list->next = NULL;
-		struct signal_node *temp;
-		for (temp = free_list + 1; temp + 1 < page2kva(p) + BY2PG; temp++) {
-			temp->next = free_list;
-			free_list = temp;
-		}
-    }
-	*new = free_list;
-	free_list = free_list->next;
-	return 0;
-}
 
 int sys_sigation(int signum, const struct sigaction *act, struct sigaction *oldact) {
 	if (signum > 64) {
@@ -547,31 +535,17 @@ int sys_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
 }
 
 int sys_send_signal(u_int envid, int sig) {
-	if (sig > 64) {
-		return -1;
-	}
-	struct Env *env;
-	struct signal_node *new;
-	if (envid == 0) {
-		env = curenv;
-	} else {
-		int r = envid2env(envid, &env, 1);
-		if (r < 0) {
-			return -1;
-		}
-	}
-	if (env->signal_list.head == NULL) {
-		sig_alloc(&new);
-		env->signal_list.len++;
-		env->signal_list.head = new;
-		new->next = NULL;
-		new->signal = sig;
-	} else {
-		sig_alloc(&new);
-		env->signal_list.len++;
-		new->next = env->signal_list.head;
-		new->signal = sig;
-		env->signal_list.head = new;
+	send_signal(envid, sig);
+	return 0;
+}
+
+int sys_signal_return() {
+	signal_finish();
+}
+
+int sys_set_signal_return(u_int addr) {
+	if (curenv->signal_return == 0) {
+		curenv->signal_return = addr;
 	}
 }
 
@@ -597,6 +571,8 @@ void *syscall_table[MAX_SYSNO] = {
 	[SYS_sigation] = sys_sigation,
 	[SYS_sigprocmask] = sys_sigprocmask,
 	[SYS_send_signal] = sys_send_signal,
+	[SYS_signal_return] = sys_signal_return,
+	[SYS_set_signal_return] = sys_set_signal_return,
 };
 
 /* Overview:

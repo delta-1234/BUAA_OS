@@ -62,10 +62,18 @@ int sigismember(const sigset_t *set, int signum) {
     }
     if (signum <= 32) {
         temp = 0x1 << (signum - 1);
-        return set->sig[0] & temp;
+        if (set->sig[0] & temp) {
+            return 1;
+        } else {
+            return 0;
+        }
     } else {
         temp = 0x1 << (signum - 33);
-        return set->sig[1] & temp;
+        if (set->sig[1] & temp) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }
 

@@ -271,6 +271,9 @@ int env_alloc(struct Env **new, u_int parent_id) {
 	e->signal_list.head = NULL;
 	e->signal_mask.sig[0] = 0;
 	e->signal_mask.sig[1] = 0;
+	e->cur_signal = NULL;
+	e->signal_return = 0;
+
 	/* Exercise 3.4: Your code here. (3/4) */
 	e->env_id = mkenvid(e);
 	r = asid_alloc(&e->env_asid);
@@ -507,6 +510,8 @@ void env_run(struct Env *e) {
 	 *    returning to the kernel caller, making 'env_run' a 'noreturn' function as well.
 	 */
 	/* Exercise 3.8: Your code here. (2/2) */
+	do_signal(&curenv->env_tf); //Lab4-challenge
+	//printk("%d\n", curenv->env_tf.cp0_epc);
 	env_pop_tf(&curenv->env_tf, curenv->env_asid);
 }
 

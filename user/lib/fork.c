@@ -16,7 +16,6 @@
 static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	u_int va = tf->cp0_badvaddr;
 	u_int perm;
-
 	/* Step 1: Find the 'perm' in which the faulting address 'va' is mapped. */
 	/* Hint: Use 'vpt' and 'VPN' to find the page table entry. If the 'perm' doesn't have
 	 * 'PTE_COW', launch a 'user_panic'. */
@@ -30,18 +29,19 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	perm = (perm & (~PTE_COW)) | PTE_D;
 	/* Step 3: Allocate a new page at 'UCOW'. */
 	/* Exercise 4.13: Your code here. (3/6) */
-	try(syscall_mem_alloc(0, UCOW, perm));
+	syscall_mem_alloc(0, UCOW, perm);
 	/* Step 4: Copy the content of the faulting page at 'va' to 'UCOW'. */
 	/* Hint: 'va' may not be aligned to a page! */
 	/* Exercise 4.13: Your code here. (4/6) */
 	memcpy((void *)UCOW, (void *)((va >> 12) << 12), BY2PG);
 	// Step 5: Map the page at 'UCOW' to 'va' with the new 'perm'.
 	/* Exercise 4.13: Your code here. (5/6) */
-	try(syscall_mem_map(0, (void *)UCOW, 0, (void *)((va >> 12) << 12), perm));
+	syscall_mem_map(0, (void *)UCOW, 0, (void *)((va >> 12) << 12), perm);
 	// Step 6: Unmap the page at 'UCOW'.
 	/* Exercise 4.13: Your code here. (6/6) */
-	try(syscall_mem_unmap(0, (void *)UCOW));
+	syscall_mem_unmap(0, (void *)UCOW);
 	// Step 7: Return to the faulting routine.
+	
 	int r = syscall_set_trapframe(0, tf);
 	user_panic("syscall_set_trapframe returned %d", r);
 }
@@ -112,7 +112,7 @@ int fork(void) {
 	if (env->env_user_tlb_mod_entry != (u_int)cow_entry) {
 		try(syscall_set_tlb_mod_entry(0, cow_entry));
 	}
-
+	syscall_set_signal_return((u_int) syscall_signal_return);
 	/* Step 2: Create a child env that's not ready to be scheduled. */
 	// Hint: 'env' should always point to the current env itself, so we should fix it to the
 	// correct value.
@@ -141,5 +141,6 @@ int fork(void) {
 	/* Exercise 4.15: Your code here. (2/2) */
 	try(syscall_set_tlb_mod_entry(child, cow_entry));
 	try(syscall_set_env_status(child, ENV_RUNNABLE));
+	syscall_set_signal_return((u_int) syscall_signal_return);
 	return child;
 }

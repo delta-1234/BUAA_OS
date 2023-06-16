@@ -1,39 +1,43 @@
-#include <lib.h> 
-int cnt=0;
-void handler(int num){
-    cnt++;
-    if(cnt>5){
-        return ;
+#include <lib.h>
+int cnt = 0;
+int father;
+void handler(int num) {
+	cnt++;
+	if (cnt > 5) {
+		return;
+	}
+	if (syscall_getenvid() == father) {
+		debugf("father get signal=%d, cnt=%d\n", num, cnt);
+	} else {
+        debugf("child get signal=%d, cnt=%d\n", num, cnt);
     }
-    debugf("cnt:%d HANDLER:%x %d\n",cnt,syscall_getenvid(),num);
 }
 
-int main(int argc, char **argv) {
-    //先注册了一个信号
-    struct sigaction act;
-    sigemptyset(&act.sa_mask);
-    act.sa_handler=handler;
-    sigaction(10,&act,NULL);
-    int father = syscall_getenvid();
-    int ret = fork();
-    debugf("father:%d child:%d\n",syscall_getenvid(),ret);
-    if (ret != 0) {
-        sigset_t set;
-        sigemptyset(&set);
-        for(int i=0;i<5;i++){
-            kill(ret,10);
-        }
-        while(cnt!=5);
-        debugf("Father passed!\n");
-    } else {
-        while(cnt!=5);
-        debugf("Child passed!\n");
-        for(int i=0;i<5;i++){
-            kill(father,10);
-        }
-    }
-    return 0;
-}     
+int main() {
+	struct sigaction act;
+	sigemptyset(&act.sa_mask);
+	act.sa_handler = handler;
+	panic_on(sigaction(15, &act, NULL));
+    panic_on(sigaction(25, &act, NULL));
+	father = syscall_getenvid();
+	int r = fork();
+	if (r != 0) {
+		sigset_t set;
+		sigemptyset(&set);
+		for (int i = 0; i < 5; i++) {
+			kill(r, 25); //向子进程发送25信号
+		}
+		while (cnt != 5); //等待子进程发送完信号
+		debugf("father test passed!\n");
+	} else {
+		while (cnt != 5); //等待父进程发送完信号
+		debugf("child test passed!\n");
+		for (int i = 0; i < 5; i++) {
+			kill(father, 15); //向子进程发送15信号
+		}
+	}
+	return 0;
+}
 
 // #include <lib.h>
 
@@ -106,4 +110,3 @@ int main(int argc, char **argv) {
 //     }
 //     return 0;
 // }
-

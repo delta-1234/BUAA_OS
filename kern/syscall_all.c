@@ -499,7 +499,7 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 
 //Lab4-challeng
 
-int sys_sigation(int signum, const struct sigaction *act, struct sigaction *oldact) {
+int sys_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
 	if (signum > 64) {
 		return -1;
 	}
@@ -572,7 +572,7 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
-	[SYS_sigation] = sys_sigation,
+	[SYS_sigaction] = sys_sigaction,
 	[SYS_sigprocmask] = sys_sigprocmask,
 	[SYS_send_signal] = sys_send_signal,
 	[SYS_signal_return] = sys_signal_return,

@@ -76,9 +76,9 @@ int syscall_read_dev(void *va, u_int dev, u_int len) {
 }
 
 //Lab4-challenge
-int syscall_sigation(int signum, const struct sigaction *act, struct sigaction *oldact) {
+int syscall_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
 	syscall_set_signal_return((u_int) syscall_signal_return);
-	return msyscall(SYS_sigation, signum, act, oldact);
+	return msyscall(SYS_sigaction, signum, act, oldact);
 }
 
 int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {

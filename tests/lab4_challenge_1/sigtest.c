@@ -1,45 +1,53 @@
 #include <lib.h>
 
-sigset_t set2;
-void print(sigset_t s){
-    debugf("%08x%08x", s.sig[1], s.sig[0]);
+int global = 0;
+int *test = NULL;
+int a[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+void handler(int num) {
+    debugf("Reach handler, now the signum is %d!\n", num);
+    global++;
 }
-int main(int argc, char **argv) {
+
+void sgv_handler(int num) {
+    debugf("Signal appear!, signum is %d\n", num);
+    test = &a[0];
+    global++;
+    debugf("test = %d.\n", *test);
+}
+
+int main() {
     sigset_t set;
-    set.sig[0] = 529;
-    set.sig[1] = 626;
-    debugf("Sigset initial value = ");
-    print(set);
-    debugf(" \n\n");
-    
-    sigfillset(&set);
-    debugf("After sigfillset, sigset value = ");
-    print(set);
-    debugf(" \n\n");    
-
     sigemptyset(&set);
-    debugf("After sigemptyset, sigset value = ");
-    print(set);
-    debugf(" \n\n");
+    struct sigaction sig, oldsig;
+    sig.sa_handler = handler;
+    sig.sa_mask = set;
+    panic_on(sigaction(2, &sig, NULL));         //注册2号信号的处理函数
 
-    sigaddset(&set, 2);
-    sigaddset(&set, 33);
-    debugf("After sigaddset 2 and 33, sigset value = ");
-    print(set);
-    debugf(" \n\n");
+    sig.sa_handler = sgv_handler;
+    panic_on(sigaction(8, &sig, NULL));        //注册8号信号处理函数
+    
+    sigaddset(&set, 2);                         //屏蔽2和8号信号
+    sigaddset(&set, 8);
+    panic_on(sigprocmask(0, &set, NULL));
+    kill(0, 2);                                 //发生2号信号
+    kill(0, 8);                                //发生8号信号
+    int ans = 0;
+    for (int i = 0; i < 10000000; i++) {
+        ans += i;
+    }
 
-    debugf("sigismember(&set, 33) = %d\n", sigismember(&set, 33));
-    debugf("sigismember(&set, 2) = %d\n", sigismember(&set, 2));
-    debugf("sigismember(&set, 15) = %d\n\n", sigismember(&set, 15));
+    debugf("\npre ans is %d\n\n", ans);
+    panic_on(sigprocmask(1, &set, NULL));       //解除2和8信号屏蔽
+    debugf("\nafter ans is %d\n", ans);
+    *test = 10;
+    debugf("now test is %d\n\n", *test);
 
-    sigdelset(&set, 2);
-    debugf("After sigdelset 2, sigset value = ");
-    print(set);
-    debugf(" \n\n");
+    panic_on(sigaction(2, &sig, &oldsig));      //交换两个处理函数
+    panic_on(sigaction(8, &oldsig, &sig));
+    panic_on(sigaction(2, &sig, NULL));
+    kill(0, 2);
+    kill(0, 8);
 
-    sigdelset(&set, 33);
-    debugf("After sigdelset 33, sigset value = ");
-    print(set);
-    debugf(" \n\n");
+    debugf("\nglobal = %d.\n", global);
     return 0;
 }

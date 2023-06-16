@@ -16,6 +16,7 @@
 static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	u_int va = tf->cp0_badvaddr;
 	u_int perm;
+	//Lab4-challenge
 	syscall_set_cow(1);
 	/* Step 1: Find the 'perm' in which the faulting address 'va' is mapped. */
 	/* Hint: Use 'vpt' and 'VPN' to find the page table entry. If the 'perm' doesn't have
@@ -43,6 +44,7 @@ static void __attribute__((noreturn)) cow_entry(struct Trapframe *tf) {
 	syscall_mem_unmap(0, (void *)UCOW);
 	// Step 7: Return to the faulting routine.
 
+	//Lab4-challenge
 	syscall_set_cow(0);
 	int r = syscall_set_trapframe(0, tf);
 	user_panic("syscall_set_trapframe returned %d", r);
@@ -143,6 +145,7 @@ int fork(void) {
 	/* Exercise 4.15: Your code here. (2/2) */
 	try(syscall_set_tlb_mod_entry(child, cow_entry));
 	try(syscall_set_env_status(child, ENV_RUNNABLE));
+	//Lab4-challenge
 	syscall_set_signal_return((u_int) syscall_signal_return);
 	return child;
 }

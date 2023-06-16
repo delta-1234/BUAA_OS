@@ -2,7 +2,7 @@
 #include <lib.h>
 
 int sigaction(int signum, const struct sigaction *act, struct sigaction *oldact) {
-    return syscall_sigation(signum, act, oldact);
+    return syscall_sigaction(signum, act, oldact);
 }
 
 

@@ -72,7 +72,7 @@ int syscall_write_dev(void *, u_int, u_int);
 int syscall_read_dev(void *, u_int, u_int);
 
 //Lab4-challenge syscall
-int syscall_sigation(int signum, const struct sigaction *act, struct sigaction *oldact);
+int syscall_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
 int syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
 int syscall_send_signal(u_int envid, int sig);
 int syscall_signal_return();

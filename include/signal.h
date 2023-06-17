@@ -9,17 +9,6 @@
 #define SIG_UNBLOCK 1
 #define SIG_SETMASK 2
 
-struct signal_node {
-    int signal;
-    struct Trapframe oldTf;
-    struct signal_node *next;
-};
-
-struct signal_quene {
-    int len;
-    struct signal_node *head;
-};
-
 typedef struct {
     u_int sig[2]; //最多64个信号
 } sigset_t;
@@ -27,6 +16,18 @@ typedef struct {
 struct sigaction {
     void (*sa_handler)(int);
     sigset_t sa_mask;
+};
+
+struct signal_node {
+    int signal;
+    sigset_t oldMask;
+    struct Trapframe oldTf;
+    struct signal_node *next;
+};
+
+struct signal_quene {
+    int len;
+    struct signal_node *head;
 };
 
 void signal_finish();

@@ -71,13 +71,16 @@ int send_signal(u_int envid, int sig) {
 void signal_finish() {
 	//printk("2\n");
 	struct Trapframe *temp_tf = &curenv->cur_signal->oldTf;
+	curenv->signal_mask = curenv->cur_signal->oldMask;
 	curenv->cur_signal = curenv->cur_signal->next;
+	do_signal(temp_tf);
 	env_pop_tf(temp_tf, curenv->env_asid);
 }
 
 void do_signal(struct Trapframe *tf) {
 	struct signal_node *temp, *pre_temp;
 	int flag = 0;
+	// printk("%d\n", curenv->signal_list.len);
 	if (curenv->signal_list.len != 0 && !curenv->isCow) {
 		temp = curenv->signal_list.head;
 		while (temp != NULL) {
@@ -92,6 +95,11 @@ void do_signal(struct Trapframe *tf) {
 			if (curenv->sigaction_list[temp->signal - 1].sa_handler) {
 				// memcpy(&temp->oldTf, tf, sizeof(struct Trapframe));
 				temp->oldTf = *tf;
+				temp->oldMask = curenv->signal_mask;
+				// curenv->signal_mask = curenv->sigaction_list[temp->signal - 1].sa_mask;
+				curenv->signal_mask.sig[0] |= curenv->sigaction_list[temp->signal - 1].sa_mask.sig[0];
+				curenv->signal_mask.sig[1] |= curenv->sigaction_list[temp->signal - 1].sa_mask.sig[1];
+				curenv->signal_mask.sig[0] &= (~(0x1 << (SIGKILL - 1))); //不允许屏蔽9号中断
 				flag = 1;
 				tf->regs[4] = temp->signal;
 				tf->regs[31] = curenv->signal_return;
